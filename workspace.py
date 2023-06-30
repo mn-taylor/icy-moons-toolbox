@@ -9,21 +9,31 @@ def handle_image_input(string):
     global global_image, computation
     print(string)
     try:
-        Image.open(string).save("image_analysis.png")
+        Image.open("images/" + string).save(
+            "images/image_analysis.png"
+        )  # if image is in images folder
         computation = None
         global_image = ImageTk.PhotoImage(formated_image())
         analyze_button.config(state="normal")
         plot_button.config(state="disabled")
         image_label.config(image=global_image)
         ui.update_idletasks()
-
     except:
-        messagebox.showerror("Image not found")
+        try:
+            Image.open(string).save("images/image_analysis.png")  # full file path given
+            computation = None
+            global_image = ImageTk.PhotoImage(formated_image())
+            analyze_button.config(state="normal")
+            plot_button.config(state="disabled")
+            image_label.config(image=global_image)
+            ui.update_idletasks()
+        except:
+            messagebox.showerror("Image not found")
 
 
 def clear_image():
     blank = Image.new(mode="RGB", size=(500, 500), color=(0, 0, 0))
-    blank.save("image_analysis.png")
+    blank.save("images/image_analysis.png")
 
     try:
         plt.close()
@@ -35,7 +45,7 @@ def clear_image():
 def formated_image():
     # Takes the image "image_analysis" file and resizes it to fit the window and stores the result in
     # resize image file
-    return Image.open("image_analysis.png").resize((500, 500), Image.ANTIALIAS)
+    return Image.open("images/image_analysis.png").resize((500, 500), Image.ANTIALIAS)
 
 
 def analyze():
@@ -61,7 +71,7 @@ def analyze():
     else:
         computation = facet_compute(file_name.get(), tuple(start), tuple(stop))
     computation.flood_count()
-    computation.get_image().save("image_analysis.png")
+    computation.get_image().save("images/image_analysis.png")
     global_image = ImageTk.PhotoImage(formated_image())
     image_label.config(image=global_image)
     plot_button.config(state="normal")
