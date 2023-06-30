@@ -9,7 +9,7 @@ __pycache__/
 
 # Images
 *.png
-!image_anaysis.png
+!image_analysis.png
 
 
 # Distribution / packaging
