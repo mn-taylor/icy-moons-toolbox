@@ -7,6 +7,11 @@ __pycache__/
 # C extensions
 *.so
 
+# Images
+*.png
+!image_anaysis.png
+
+
 # Distribution / packaging
 .Python
 build/

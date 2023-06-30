@@ -9,7 +9,7 @@ def handle_image_input(string):
     global global_image, computation
     print(string)
     try:
-        Image.open(string).save("images/image_analysis.png")
+        Image.open("images/" + string).save("images/image_analysis.png")
         computation = None
         global_image = ImageTk.PhotoImage(formated_image())
         analyze_button.config(state="normal")
@@ -18,7 +18,16 @@ def handle_image_input(string):
         ui.update_idletasks()
 
     except:
-        messagebox.showerror("Image not found")
+        try:
+            Image.open(string).save("images/image_analysis.png")
+            computation = None
+            global_image = ImageTk.PhotoImage(formated_image())
+            analyze_button.config(state="normal")
+            plot_button.config(state="disabled")
+            image_label.config(image=global_image)
+            ui.update_idletasks()
+        except:
+            messagebox.showerror("Image not found")
 
 
 def clear_image():
