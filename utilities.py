@@ -5,6 +5,7 @@ black = (0, 0, 0)
 
 
 def is_color(color):
+    # test
     return all(0 <= x <= 255 for x in color)
 
 
