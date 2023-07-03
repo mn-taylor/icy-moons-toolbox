@@ -171,12 +171,19 @@ class facet_compute:
             surface_areas.append(data[0] / 10e6)
             perimeters.append(data[1] / 10e3)
 
-        plt.scatter(surface_areas, perimeters, marker="x")
-        plt.title("Surface Area vs. Perimeter")
-        plt.xlabel("Surface Area (km^2)")
-        # plt.xscale("log")
-        plt.ylabel("Perimeter (km)")
-        # plt.yscale("log")
+        fig, axs = plt.subplots(1, 2)
+        fig.suptitle("Surface Area vs. Perimeter")
+
+        axs[0].scatter(surface_areas, perimeters, marker="x")
+        axs[0].set(xlabel="Surface Area (km^2)", ylabel="Perimeter (km)")
+
+        axs[1].scatter(surface_areas, perimeters, marker="x")
+        axs[1].set(
+            xlabel="Surface Area (km^2)",
+            ylabel="Perimeter (km)",
+            xscale="log",
+            yscale="log",
+        )
         plt.show()
 
     def in_bounds(self, location):
@@ -204,7 +211,7 @@ class facet_compute:
 
 
 if __name__ == "__main__":
-    x = facet_compute("fractures.png", (200, 13), (1000, 810))
+    x = facet_compute("images/fractures.png", (200, 13), (1000, 810))
 
     start = time.time()
     x.flood_count()
