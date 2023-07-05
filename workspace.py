@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import os
 from tkinter import *
 from tkinter import messagebox
 from PIL import Image, ImageTk
@@ -9,7 +10,7 @@ def handle_image_input(string):
     global global_image, computation
     print(string)
     try:
-        Image.open("images/" + string).save("images/image_analysis.png")
+        Image.open("images/" + string).save("images/display.png")
         computation = None
         global_image = ImageTk.PhotoImage(formated_image())
         analyze_button.config(state="normal")
@@ -19,7 +20,7 @@ def handle_image_input(string):
 
     except:
         try:
-            Image.open(string).save("images/image_analysis.png")
+            Image.open(string).save("images/display.png")
             computation = None
             global_image = ImageTk.PhotoImage(formated_image())
             analyze_button.config(state="normal")
@@ -32,7 +33,7 @@ def handle_image_input(string):
 
 def clear_image():
     blank = Image.new(mode="RGB", size=(500, 500), color=(0, 0, 0))
-    blank.save("images/image_analysis.png")
+    blank.save("images/display.png")
 
     try:
         plt.close()
@@ -42,9 +43,9 @@ def clear_image():
 
 
 def formated_image():
-    # Takes the image "image_analysis" file and resizes it to fit the window and stores the result in
+    # Takes the image "display" file and resizes it to fit the window and stores the result in
     # resize image file
-    return Image.open("images/image_analysis.png").resize((500, 500), Image.ANTIALIAS)
+    return Image.open("images/display.png").resize((500, 500), Image.ANTIALIAS)
 
 
 def analyze():
@@ -70,7 +71,7 @@ def analyze():
     else:
         computation = facet_compute(file_name.get(), tuple(start), tuple(stop))
     computation.flood_count()
-    computation.get_image().save("images/image_analysis.png")
+    computation.get_image().save("images/display.png")
     global_image = ImageTk.PhotoImage(formated_image())
     image_label.config(image=global_image)
     plot_button.config(state="normal")
@@ -257,7 +258,15 @@ start_frame = Frame(control_frame)
 stop_frame = Frame(control_frame)
 analyze_button_frame = Frame(control_frame)
 plot_button_frame = Frame(control_frame)
-quick_pack([start_frame, stop_frame, analyze_button_frame, plot_button_frame])
+help_button_frame = Frame(control_frame)
+quick_pack(
+    [
+        start_frame,
+        stop_frame,
+        analyze_button_frame,
+        plot_button_frame,
+    ]
+)
 
 start_label = Label(start_frame, text="START")
 start_inputs = Frame(start_frame)
@@ -295,6 +304,7 @@ plot_button = Button(
     plot_button_frame, text="PLOT", command=plot_window, state="disabled"
 )
 plot_button.pack()
+
 
 ui.mainloop()
 clear_image()
