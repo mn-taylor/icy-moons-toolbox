@@ -236,7 +236,6 @@ image_input_frame.pack()
 
 file_input_label = Label(image_input_frame, text="File Name")
 file_name = StringVar()
-file_name.set("fractures.png")
 file_input_entry = Entry(image_input_frame, textvariable=file_name)
 file_input_button = Button(
     image_input_frame, text="LOAD", command=lambda: handle_image_input(file_name.get())
