@@ -118,9 +118,14 @@ def string_to_tuples(string):
             if num:
                 string_nums.append(num)
             num = ""
-
+    if num != "":
+        string_nums.append(num)
     print(string_nums)
     result = []
     for i in range(len(string_nums) // 2):
         result.append((int(string_nums[2 * i]), int(string_nums[2 * i + 1])))
     return result
+
+
+if __name__ == "__main__":
+    print(string_to_tuples(""))

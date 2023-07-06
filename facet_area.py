@@ -26,13 +26,18 @@ pixel_area = (1.606400e03) ** 2  # meters
 
 
 class facet_compute:
-    def __init__(self, image, start=(0, 0), stop=None):
+    def __init__(self, image, hscale, vscale, units, start=(0, 0), stop=None):
         self.output = Image.open(image).copy()
         self.start = start
         if stop is None:
             self.stop = self.output.size
         else:
             self.stop = stop
+
+        self.hscale = hscale
+        self.vscale = vscale
+        self.pixel_area = hscale * vscale
+        self.units = units
 
         self.data = {}
         self.counted = set()
@@ -126,8 +131,8 @@ class facet_compute:
     def new_data_point(self, data_point):
         if data_point[1][0] != 1:  # Dont count single enclosed pixels
             self.data[data_point[0]] = (
-                data_point[1][0] * pixel_area,
-                data_point[1][1] * pixel_length,
+                data_point[1][0] * self.pixel_area,
+                data_point[1][1] * (self.hscale + self.vscale) / 2,
             )
         # print(data_point[1])
 
@@ -155,7 +160,7 @@ class facet_compute:
         y = nums.values()
         plt.bar(x, y, width=bucket_size * 0.9)
         plt.title("Surface Area Distribution")
-        plt.xlabel("Surface Area (m^2)")
+        plt.xlabel(f"Surface Area ({self.units}^2)")
         plt.ylabel("# of Facets ")
         plt.show()
 
@@ -168,19 +173,23 @@ class facet_compute:
         surface_areas = []
         perimeters = []
         for data in self.data.values():
-            surface_areas.append(data[0] / 10e6)
-            perimeters.append(data[1] / 10e3)
+            # surface_areas.append(data[0] / 10e6)
+            surface_areas.append(data[0])
+            # perimeters.append(data[1] / 10e3)
+            perimeters.append(data[1])
 
         fig, axs = plt.subplots(1, 2)
         fig.suptitle("Surface Area vs. Perimeter")
 
         axs[0].scatter(surface_areas, perimeters, marker="x")
-        axs[0].set(xlabel="Surface Area (km^2)", ylabel="Perimeter (km)")
+        axs[0].set(
+            xlabel=f"Surface Area ({self.units}^2)", ylabel=f"Perimeter ({self.units})"
+        )
 
         axs[1].scatter(surface_areas, perimeters, marker="x")
         axs[1].set(
-            xlabel="Surface Area (km^2)",
-            ylabel="Perimeter (km)",
+            xlabel=f"Surface Area ({self.units}^2)",
+            ylabel=f"Perimeter ({self.units})",
             xscale="log",
             yscale="log",
         )
@@ -211,7 +220,9 @@ class facet_compute:
 
 
 if __name__ == "__main__":
-    x = facet_compute("images/fractures.png", (200, 13), (1000, 810))
+    x = facet_compute(
+        "images/fractures.png", 1.606400e3, 1.606400e3, "m", (200, 13), (1000, 810)
+    )
 
     start = time.time()
     x.flood_count()
