@@ -105,3 +105,22 @@ def configure_boundary(image, start, stop, counted):
             return (start[0], location[1] + 1)
 
     return get_neighbors_func, next_pixel_func
+
+
+def string_to_tuples(string):
+    num = ""
+    string_nums = []
+    for char in string:
+        try:
+            int(char)
+            num += char
+        except:
+            if num:
+                string_nums.append(num)
+            num = ""
+
+    print(string_nums)
+    result = []
+    for i in range(len(string_nums) // 2):
+        result.append((int(string_nums[2 * i]), int(string_nums[2 * i + 1])))
+    return result
