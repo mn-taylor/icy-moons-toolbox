@@ -80,12 +80,23 @@ if __name__ == "__main__":
     nums = count(lengths, 25)
     print
     # Filters out outliers
-    nums = {k: v for k, v in nums.items() if v > 5}
+    nums = {k: v for k, v in nums.items() if v > 0}
 
-    # nums = average_over_data()
     x = [bucket_size * length for length in nums.keys()]
+
+    errors = []
+    print(x_scale)
+    for length in x:
+        if 0 < length < 50 * x_scale / x_axis_units:
+            errors.append(100 * 0.18 * x_scale / x_axis_units)
+        elif length < 500 * x_scale / x_axis_units:
+            errors.append(100 * 1.45 * x_scale / x_axis_units)
+        else:
+            errors.append(100 * 7.69 * x_scale / x_axis_units)
+    print(list(zip(x, errors)))
     y = nums.values()
-    plt.bar(x, y, width=25 * 0.9)
+    plt.bar(x, y, width=25 * 0.9, xscale="log")
+    plt.errorbar(x, y, xerr=errors, fmt="o", color="r", xscale="log")
     plt.title("Distribution of Fracture Lengths in 5189r")
     plt.xlabel("Lengths of Fractures (10^3 km)")
     plt.ylabel("# of Fractures")

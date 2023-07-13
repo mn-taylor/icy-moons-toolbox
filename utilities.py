@@ -68,7 +68,7 @@ def color_pallete(num_colors, root_colors, shift, radius):
         # print(len(global_colors))
         i += 1
 
-    return list(global_colors)
+    return list(color for color in global_colors if is_color(color))
 
 
 def configure_boundary(image, start, stop, counted):
@@ -128,4 +128,5 @@ def string_to_tuples(string):
 
 
 if __name__ == "__main__":
+    print(is_color((260, 150, 0)))
     print(string_to_tuples(""))

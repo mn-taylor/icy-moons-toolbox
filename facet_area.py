@@ -1,5 +1,5 @@
 from PIL import Image
-from utilities import targeted_rand_color, configure_boundary, color_pallete
+from utilities import targeted_rand_color, configure_boundary, color_pallete, is_color
 from analysis import count
 from collections import deque
 import matplotlib.pyplot as plt
@@ -19,7 +19,10 @@ root_colors = [
     (213, 94, 0),
     (204, 121, 167),
 ]
-palette = color_pallete(1000, root_colors, 15, 100)
+palette = color_pallete(100, root_colors, 15, 100)
+for color in palette:
+    if not is_color(color):
+        raise Exception
 random_color_func = targeted_rand_color(palette)
 pixel_length = 1.606400e3
 pixel_area = (1.606400e03) ** 2  # meters
@@ -58,6 +61,7 @@ class facet_compute:
                 self.counted.add(curr)
             else:
                 # Flood fill counting
+                print("colored facet")
                 self.new_data_point(self.color_facet(curr))
 
             curr = self.next_pixel(curr)
@@ -68,7 +72,10 @@ class facet_compute:
         perimeter = 0
         color = random_color_func()
         for pixel in self.facet_gen(location, new_counted=False):
-            self.output.putpixel((pixel), color)
+            try:
+                self.output.putpixel((pixel), color)
+            except:
+                print((pixel, color))
             num_pixels += 1
             perimeter += self.get_perimeter(pixel)
 
@@ -77,14 +84,14 @@ class facet_compute:
     def count_facet(self, location):
         num_pixels = 0
         perimeter = 0
-        for pixel in self.facet_gen(location):
+        for pixel in self.facet_gen(location, new_counted=False):
             num_pixels += 1
             perimeter += self.get_perimeter(pixel)
         return location, (num_pixels, perimeter)
 
-    def facet_gen(self, location, new_counted=True):
+    def facet_gen(self, location, new_counted=False):
         # Generator that given a location, yields all of the indices in that facet in no particuar order
-        agenda = deque([location])
+        agenda = [location]
         if new_counted:
             counted = set()
         else:
@@ -93,7 +100,7 @@ class facet_compute:
             self.output, self.start, self.stop, counted
         )[0]
         while agenda:
-            current = agenda.popleft()
+            current = agenda.pop(0)
             neighbors = neighbors_func(current)
             counted.update(neighbors)
             agenda.extend(neighbors)
@@ -223,13 +230,5 @@ if __name__ == "__main__":
     x = facet_compute(
         "images/fractures.png", 1.606400e3, 1.606400e3, "m", (200, 13), (1000, 810)
     )
-
-    start = time.time()
     x.flood_count()
-    x.remove_facets([(790, 169)])
-    x.perimeter_vs_surface()
-    # x.analyze_surface_area(5e7, 5)
-    # x.remove_facets([(890, 13)])
-    # print((time.time() - start))
-    x.offload_data()
     x.get_image().show()

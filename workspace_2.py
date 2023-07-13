@@ -214,3 +214,7 @@ image_label.pack(side="left")
 
 ui.mainloop()
 clear_image()
+try:
+    plt.close()
+except:
+    pass
