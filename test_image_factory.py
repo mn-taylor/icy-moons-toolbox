@@ -1,8 +1,8 @@
 from PIL import Image
 from utilities import color_pallete
 
-width = 100
-height = 100
+width = 5
+height = 5
 
 img = Image.new(mode="RGB", size=(width, height), color=(0, 0, 0))
 
@@ -12,6 +12,7 @@ def make_fractures(locations):
         img.putpixel(location, (255, 255, 255))
 
 
+"""
 roots = [
     (51, 34, 136),
     (17, 119, 51),
@@ -30,6 +31,8 @@ for color in colors[1:]:
 for i in range(width):
     for j in range(height):
         img.putpixel((i, j), colors[i * width + j])
+"""
 
+make_fractures([])
 img.show()
-# img.save("test.png")
+img.save("images/test.png")

@@ -1,5 +1,11 @@
 from PIL import Image
-from utilities import targeted_rand_color, configure_boundary, color_pallete, is_color
+from utilities import (
+    targeted_rand_color,
+    configure_boundary,
+    color_pallete,
+    is_color,
+    convert_to_RGB,
+)
 from analysis import count
 from collections import deque
 import matplotlib.pyplot as plt
@@ -19,7 +25,7 @@ root_colors = [
     (213, 94, 0),
     (204, 121, 167),
 ]
-palette = color_pallete(100, root_colors, 15, 100)
+palette = color_pallete(1000, root_colors, 15, 100)
 for color in palette:
     if not is_color(color):
         raise Exception
@@ -30,7 +36,7 @@ pixel_area = (1.606400e03) ** 2  # meters
 
 class facet_compute:
     def __init__(self, image, hscale, vscale, units, start=(0, 0), stop=None):
-        self.output = Image.open(image).copy()
+        self.output = convert_to_RGB(image)
         self.start = start
         if stop is None:
             self.stop = self.output.size
@@ -46,7 +52,7 @@ class facet_compute:
         self.counted = set()
 
         self.get_neighbors, self.next_pixel = configure_boundary(
-            self.output, start, stop, self.counted
+            self.output, self.start, self.stop, self.counted
         )
 
     def flood_count(self):
@@ -61,7 +67,6 @@ class facet_compute:
                 self.counted.add(curr)
             else:
                 # Flood fill counting
-                print("colored facet")
                 self.new_data_point(self.color_facet(curr))
 
             curr = self.next_pixel(curr)
@@ -71,11 +76,9 @@ class facet_compute:
         num_pixels = 0
         perimeter = 0
         color = random_color_func()
-        for pixel in self.facet_gen(location, new_counted=False):
-            try:
-                self.output.putpixel((pixel), color)
-            except:
-                print((pixel, color))
+        # for pixel in self.facet_gen(location, new_counted=False):
+        for pixel in self.test_gen(location):
+            self.output.putpixel(pixel, color)
             num_pixels += 1
             perimeter += self.get_perimeter(pixel)
 
@@ -103,6 +106,15 @@ class facet_compute:
             current = agenda.pop(0)
             neighbors = neighbors_func(current)
             counted.update(neighbors)
+            agenda.extend(neighbors)
+            yield current
+
+    def test_gen(self, location):
+        agenda = [location]
+        while agenda:
+            current = agenda.pop(0)
+            neighbors = self.get_neighbors(current)
+            self.counted.update(neighbors)
             agenda.extend(neighbors)
             yield current
 
@@ -146,10 +158,13 @@ class facet_compute:
     def remove_facets(self, locations):
         # Given an array of pixel locations, removes the data points that correspond to each pixels facet area.
         removed = []
+        print(locations)
         for location in locations:
             if not self.in_bounds(location):
+                print("not in bounds")
                 continue
-            for pixel in self.facet_gen(location):
+            for pixel in self.facet_gen(location, new_counted=True):
+                # print("removing")
                 self.output.putpixel((pixel), black)
                 if pixel in self.data:
                     removed.append((location, self.data[pixel]))
@@ -186,7 +201,7 @@ class facet_compute:
             perimeters.append(data[1])
 
         fig, axs = plt.subplots(1, 2)
-        fig.suptitle("Surface Area vs. Perimeter")
+        fig.suptitle("Surface Area vs. Perimeter (5178r)")
 
         axs[0].scatter(surface_areas, perimeters, marker="x")
         axs[0].set(
@@ -196,7 +211,6 @@ class facet_compute:
         axs[1].scatter(surface_areas, perimeters, marker="x")
         axs[1].set(
             xlabel=f"Surface Area ({self.units}^2)",
-            ylabel=f"Perimeter ({self.units})",
             xscale="log",
             yscale="log",
         )
@@ -228,7 +242,10 @@ class facet_compute:
 
 if __name__ == "__main__":
     x = facet_compute(
-        "images/fractures.png", 1.606400e3, 1.606400e3, "m", (200, 13), (1000, 810)
+        "images/true_fractures.png", 1.606400e3, 1.606400e3, "m", (200, 14), None
     )
     x.flood_count()
+    x.remove_facets([(749, 139)])
+    # print(len(list(x.facet_gen((749, 139), new_counted=True))))
+    x.perimeter_vs_surface()
     x.get_image().show()

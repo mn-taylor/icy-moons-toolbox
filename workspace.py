@@ -1,30 +1,25 @@
 import matplotlib.pyplot as plt
-import os
 from tkinter import *
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 from PIL import Image, ImageTk
 from facet_area import facet_compute
+from utilities import string_to_tuples
 
 
-def handle_image_input(string):
-    global global_image, computation
-    print(string)
+def handle_image_input():
+    global global_image, computation, file_name
     try:
-        Image.open("images/" + string).save("images/display.png")
+        Image.open("images/" + file_name.get()).save("images/display.png")
         computation = None
         global_image = ImageTk.PhotoImage(formated_image())
-        analyze_button.config(state="normal")
-        plot_button.config(state="disabled")
         image_label.config(image=global_image)
         ui.update_idletasks()
 
     except:
         try:
-            Image.open(string).save("images/display.png")
+            Image.open(file_name.get()).save("images/display.png")
             computation = None
             global_image = ImageTk.PhotoImage(formated_image())
-            analyze_button.config(state="normal")
-            plot_button.config(state="disabled")
             image_label.config(image=global_image)
             ui.update_idletasks()
         except:
@@ -45,182 +40,89 @@ def clear_image():
 def formated_image():
     # Takes the image "display" file and resizes it to fit the window and stores the result in
     # resize image file
-    return Image.open("images/display.png").resize((500, 500), Image.ANTIALIAS)
+    return Image.open("images/display.png").resize((300, 300), Image.ANTIALIAS)
 
 
 def analyze():
-    global global_image, computation
-    start = [0, 0]
-    stop = [0, 0]
-    print(start_x.get() != "")
-    try:
-        if start_x.get() != "":
-            start[0] = int(start_x.get())
-        print("here")
-        if start_y.get() != "":
-            start[1] = int(start_y.get())
-        if stop_x.get() != "" and int(stop_x.get()) > start[0]:
-            stop[0] = int(stop_x.get())
-        if stop_y.get() != "" and int(stop_y.get()) > start[1]:
-            stop[1] = int(stop_y.get())
-    except TypeError:
-        messagebox.showerror("Make sure inputs are integers")
+    def handle_no():
+        global confirmed
+        top.destroy()
+        confirmed = False
 
-    if stop[0] == 0 and stop[1] == 0:
-        computation = facet_compute(file_name.get(), tuple(start))
-    else:
-        computation = facet_compute(file_name.get(), tuple(start), tuple(stop))
-    computation.flood_count()
-    computation.get_image().save("images/display.png")
-    global_image = ImageTk.PhotoImage(formated_image())
-    image_label.config(image=global_image)
-    plot_button.config(state="normal")
-    ui.update_idletasks()
+    global ui, global_image, computation, start, stop, removed, v_scale, h_scale, units, confirmed, file_name
+    confirmed = True
 
+    # start and stop indices are ill-formed
+    if len(string_to_tuples(start.get())) < 1 or len(string_to_tuples(stop.get())) < 1:
+        messagebox.showerror("Please format start and stop indices as (x, y)")
+        return
 
-def plot_window():
-    global computation, plot_inputs_frame
-
-    def perimeter_widgets():
-        global plot_inputs_frame
-
-        try:
-            plt.close()
-        except:
-            pass
-
-        plot_type.set("Perimeter")
-
-        plot_inputs_frame.destroy()
-        plot_inputs_frame = Frame(plot_window)
-        plot_inputs_frame.pack(side="bottom")
-
-        bucket_frame = Frame(plot_inputs_frame)
-        bucket_frame.pack(side="top")
-
-        bucket_size = StringVar()
-        bucket_size.set("0")
-        bucket_size_label = Label(bucket_frame, text="Bucket Size")
-        bucker_size_entry = Entry(bucket_frame, textvariable=bucket_size)
-        quick_pack([bucket_size_label, bucker_size_entry])
-
-        threshold_frame = Frame(plot_inputs_frame)
-        threshold_frame.pack(side="top")
-
-        threshold = StringVar()
-        threshold.set("0")
-        threshold_label = Label(threshold_frame, text="Threshold")
-        threshold_entry = Entry(threshold_frame, textvariable=threshold)
-        quick_pack([threshold_label, threshold_entry])
-
-        plot_button_frame = Frame(plot_inputs_frame)
-        plot_button_frame.pack(side="top")
-
-        plot_button = Button(
-            plot_button_frame,
-            text="PLOT",
-            command=lambda: computation.analyze_perimeter(
-                float(bucket_size.get()), float(threshold.get())
-            ),
+    # missing inputs
+    if h_scale.get() == "" or v_scale.get() == "" or units.get() == "":
+        messagebox.showerror("Please input the images pixels scales and units")
+        return
+    """
+    if removed.get("1.0", "end-1c") != "":
+        top = Toplevel(ui)
+        confirmation = "Are you sure that you want to remove" + str(
+            string_to_tuples(removed.get("1.0", "end-1c"))
         )
-        plot_button.pack()
+        confirmation_label = Label(top, text=confirmation)
+        confirmation_label.pack(side="top")
+        buttons_frame = Frame(top)
+        buttons_frame.pack(side="top")
+        yes_button = Button(buttons_frame, text="YES", command=lambda: top.destroy)
+        no_button = Button(buttons_frame, text="NO", command=handle_no)
+        quick_pack([yes_button, no_button], side="left")
+    """
+    if confirmed:
+        file = "images/" + file_name.get()
+        horizonal = float(h_scale.get())
+        vertical = float(v_scale.get())
+        if len(string_to_tuples(start.get())) == 1:
+            start_idx = string_to_tuples(start.get())[0]
+        else:
+            start_idx = (0, 0)
+        if len(string_to_tuples(stop.get())) == 1:
+            stop_idx = string_to_tuples(stop.get())[0]
+        else:
+            stop_idx = None
 
-    def surface_perim_widgets():
-        global plot_inputs_frame
-
-        try:
-            plt.close()
-        except:
-            pass
-
-        plot_type.set("Surface Area vs. Perimeter")
-
-        plot_inputs_frame.destroy()
-        plot_inputs_frame = Frame(plot_window)
-        plot_inputs_frame.pack(side="bottom")
-
-        plot_button_frame = Frame(plot_inputs_frame)
-        plot_button_frame.pack(side="top")
-
-        plot_button = Button(
-            plot_button_frame,
-            text="PLOT",
-            command=lambda: computation.perimeter_vs_surface(),
+        computation = facet_compute(
+            file, horizonal, vertical, units.get(), start_idx, stop_idx
         )
-        plot_button.pack()
+        computation.flood_count()
 
-        pass
+        to_remove = []
+        if removed.get("1.0", "end-1c"):
+            to_remove = string_to_tuples(removed.get("1.0", "end-1c"))
+        computation.remove_facets(to_remove)
 
-    def surface_widgets():
-        global plot_inputs_frame
-
-        try:
-            plt.close()
-        except:
-            pass
-        plot_type.set("Surface Area")
-
-        plot_inputs_frame.destroy()
-        plot_inputs_frame = Frame(plot_window)
-        plot_inputs_frame.pack(side="bottom")
-
-        bucket_frame = Frame(plot_inputs_frame)
-        bucket_frame.pack(side="top")
-
-        bucket_size = StringVar()
-        bucket_size.set("0")
-        bucket_size_label = Label(bucket_frame, text="Bucket Size")
-        bucker_size_entry = Entry(bucket_frame, textvariable=bucket_size)
-        quick_pack([bucket_size_label, bucker_size_entry])
-
-        threshold_frame = Frame(plot_inputs_frame)
-        threshold_frame.pack(side="top")
-
-        threshold = StringVar()
-        threshold.set("0")
-        threshold_label = Label(threshold_frame, text="Threshold")
-        threshold_entry = Entry(threshold_frame, textvariable=threshold)
-        quick_pack([threshold_label, threshold_entry])
-
-        plot_button_frame = Frame(plot_inputs_frame)
-        plot_button_frame.pack(side="top")
-
-        plot_button = Button(
-            plot_button_frame,
-            text="PLOT",
-            command=lambda: computation.analyze_surface_area(
-                float(bucket_size.get()), float(threshold.get())
-            ),
-        )
-        plot_button.pack()
-
-    plot_window = Toplevel(ui)
-    plot_frame = Frame(plot_window)
-    plot_frame.pack()
-
-    plot_inputs_frame = Frame(plot_window)
-    plot_inputs_frame.pack(side="bottom")
-
-    plot_type = StringVar()
-    plot_type.set("Plot Type")
-    plot_type_menubutton = Menubutton(plot_frame, textvariable=plot_type)
-    plot_type_menubutton.pack()
-    plot_type_menubutton.menu = Menu(
-        plot_type_menubutton,
-    )
-    plot_type_menubutton["menu"] = plot_type_menubutton.menu
-
-    plot_type_menubutton.menu.add_command(label="Perimeter", command=perimeter_widgets)
-    plot_type_menubutton.menu.add_command(label="Surface Area", command=surface_widgets)
-    plot_type_menubutton.menu.add_command(
-        label="Perimeter vs. Surface Area", command=surface_perim_widgets
-    )
-    print("plot_inputs_frame" in locals())
+        computation.get_image().save("images/display.png")
+        global_image = ImageTk.PhotoImage(formated_image())
+        image_label.config(image=global_image)
 
 
-def quick_pack(args):
+def plot():
+    global computation
+    computation.perimeter_vs_surface()
+    pass
+
+
+def offload():
+    global computation, file_name
+    output_file = ""
+    i = 0
+    while file_name.get()[i] != ".":
+        output_file += file_name.get()[i]
+        i += 1
+    output_file += "_data.csv"
+    computation.offload_data(output_file)
+
+
+def quick_pack(args, side):
     for elt in args:
-        elt.pack(side="left")
+        elt.pack(side=side)
 
 
 clear_image()
@@ -230,80 +132,88 @@ ui.resizable(False, False)
 global_image = None
 computation = None
 plot_inputs_frame = None
+confirmed = True
 
-image_input_frame = Frame(ui)
-image_input_frame.pack()
+image_info_frame = Frame(ui)
+analysis_frame = Frame(ui)
+quick_pack([image_info_frame, analysis_frame], side="top")
 
-file_input_label = Label(image_input_frame, text="File Name")
+image_inputs_frame = Frame(image_info_frame)
+load_frame = Frame(image_info_frame)
+quick_pack([image_inputs_frame, load_frame], side="top")
+
+image_inputs_frame.pack(side="top")
+
+file_name_frame = Frame(image_inputs_frame)
+h_scale_frame = Frame(image_inputs_frame)
+v_scale_frame = Frame(image_inputs_frame)
+units_frame = Frame(image_inputs_frame)
+quick_pack([file_name_frame, h_scale_frame, v_scale_frame, units_frame], side="left")
+
+file_label = Label(file_name_frame, text="File")
 file_name = StringVar()
-file_input_entry = Entry(image_input_frame, textvariable=file_name)
-file_input_button = Button(
-    image_input_frame, text="LOAD", command=lambda: handle_image_input(file_name.get())
-)
+file_input = Entry(file_name_frame, textvariable=file_name)
+quick_pack([file_label, file_input], side="top")
 
-quick_pack([file_input_label, file_input_entry, file_input_button])
+h_scale_label = Label(h_scale_frame, text="Horizontal Scale")
+h_scale = StringVar()
+h_scale_input = Entry(h_scale_frame, textvariable=h_scale)
+quick_pack([h_scale_label, h_scale_input], side="top")
 
-image_frame = Frame(ui)
-image_frame.pack()
+v_scale_label = Label(v_scale_frame, text="Vertical Scale")
+v_scale = StringVar()
+v_scale_input = Entry(v_scale_frame, textvariable=v_scale)
+quick_pack([v_scale_label, v_scale_input], side="top")
+
+units_label = Label(units_frame, text="Units")
+units = StringVar()
+units_input = Entry(units_frame, textvariable=units)
+quick_pack([units_label, units_input], side="top")
+
+load_button = Button(load_frame, text="LOAD", command=handle_image_input)
+load_button.pack(side="top")
+
+##########################
+analysis_inputs_frame = Frame(analysis_frame)
+display_frame = Frame(analysis_frame)
+quick_pack([analysis_inputs_frame, display_frame], side="left")
+
+start_stop_frame = Frame(analysis_inputs_frame)
+remove_frame = Frame(analysis_inputs_frame)
+analyze_buttons_frame = Frame(analysis_inputs_frame)
+quick_pack([start_stop_frame, remove_frame, analyze_buttons_frame], side="top")
+
+start_frame = Frame(start_stop_frame)
+stop_frame = Frame(start_stop_frame)
+quick_pack([start_frame, stop_frame], side="left")
+
+start_label = Label(start_frame, text="Start")
+start = StringVar()
+start_input = Entry(start_frame, textvariable=start, width=10)
+quick_pack([start_label, start_input], side="top")
+
+stop_label = Label(stop_frame, text="Stop")
+stop = StringVar()
+stop_input = Entry(stop_frame, textvariable=stop, width=10)
+quick_pack([stop_label, stop_input], side="top")
+
+remove_label = Label(remove_frame, text="Remove")
+removed = Text(remove_frame, height=5, width=30)
+quick_pack([remove_label, removed], side="top")
+
+analyze_button = Button(analyze_buttons_frame, text="ANALYZE", command=analyze)
+plot_button = Button(analyze_buttons_frame, text="PLOT", command=plot)
+data_button = Button(analyze_buttons_frame, text="OFFLOAD DATA", command=offload)
+quick_pack([analyze_button, plot_button, data_button], side="top")
 
 img = ImageTk.PhotoImage(formated_image())
-image_label = Label(image_frame, image=img)
-image_label.pack()
-
-control_frame = Frame(ui)
-control_frame.pack()
-
-start_frame = Frame(control_frame)
-stop_frame = Frame(control_frame)
-analyze_button_frame = Frame(control_frame)
-plot_button_frame = Frame(control_frame)
-help_button_frame = Frame(control_frame)
-quick_pack(
-    [
-        start_frame,
-        stop_frame,
-        analyze_button_frame,
-        plot_button_frame,
-    ]
-)
-
-start_label = Label(start_frame, text="START")
-start_inputs = Frame(start_frame)
-start_label.pack()
-start_inputs.pack()
-
-start_x = StringVar()
-start_x_label = Label(start_inputs, text="x:")
-start_x_entry = Entry(start_inputs, textvariable=start_x, width=3)
-start_y = StringVar()
-start_y_label = Label(start_inputs, text="y:")
-start_y_entry = Entry(start_inputs, textvariable=start_y, width=3)
-quick_pack([start_x_label, start_x_entry, start_y_label, start_y_entry])
-
-
-stop_label = Label(stop_frame, text="START")
-stop_inputs = Frame(stop_frame)
-stop_label.pack()
-stop_inputs.pack()
-
-stop_x = StringVar()
-stop_y = StringVar()
-stop_x_label = Label(stop_inputs, text="x:")
-stop_x_entry = Entry(stop_inputs, textvariable=stop_x, width=3)
-stop_y_label = Label(stop_inputs, text="y:")
-stop_y_entry = Entry(stop_inputs, textvariable=stop_y, width=3)
-quick_pack([stop_x_label, stop_x_entry, stop_y_label, stop_y_entry])
-
-analyze_button = Button(
-    analyze_button_frame, text="ANALYZE", command=analyze, state="disabled"
-)
-analyze_button.pack()
-
-plot_button = Button(
-    plot_button_frame, text="PLOT", command=plot_window, state="disabled"
-)
-plot_button.pack()
+image_label = Label(display_frame, image=img)
+image_label.pack(side="left")
 
 
 ui.mainloop()
 clear_image()
+try:
+    plt.close()
+except:
+    pass

@@ -1,4 +1,5 @@
 import random
+from PIL import Image
 
 white = (255, 255, 255)
 black = (0, 0, 0)
@@ -7,6 +8,22 @@ black = (0, 0, 0)
 def is_color(color):
     # test
     return all(0 <= x <= 255 for x in color)
+
+
+def convert_to_RGB(file_name):
+    # if input image is not an RBG image, returns a copy.
+    img = Image.open(file_name).copy()
+    if isinstance(img.getpixel((0, 0)), tuple):
+        return img
+    else:
+        new_image = Image.new(
+            mode="RGB", size=(img.size[0], img.size[1]), color=(0, 0, 0)
+        )
+        for row in img.size[0]:
+            for col in img.size[1]:
+                if img.getpixel((row, col)) == 255:
+                    new.putpixel((row, col), white)
+        return new_image
 
 
 def rand_color():
@@ -84,6 +101,7 @@ def configure_boundary(image, start, stop, counted):
         # returns a set of the pixels above, below, and to the right and left of the given pixel
         # given that they are in bounds and havent been visited
         x, y = location[0], location[1]
+        # counted = set()
         neighbors = set()
         for dx, dy in deltas:
             if (x + dx, y + dy) in counted:
@@ -96,6 +114,9 @@ def configure_boundary(image, start, stop, counted):
                 continue
             else:
                 neighbors.add((x + dx, y + dy))
+        for neighbor in neighbors:
+            if image.getpixel(neighbor) == white:
+                raise Exception
         return neighbors
 
     def next_pixel_func(location):
@@ -120,7 +141,6 @@ def string_to_tuples(string):
             num = ""
     if num != "":
         string_nums.append(num)
-    print(string_nums)
     result = []
     for i in range(len(string_nums) // 2):
         result.append((int(string_nums[2 * i]), int(string_nums[2 * i + 1])))
@@ -128,5 +148,4 @@ def string_to_tuples(string):
 
 
 if __name__ == "__main__":
-    print(is_color((260, 150, 0)))
-    print(string_to_tuples(""))
+    pass
