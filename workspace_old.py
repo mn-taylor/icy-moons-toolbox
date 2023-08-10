@@ -3,7 +3,7 @@ import os
 from tkinter import *
 from tkinter import messagebox
 from PIL import Image, ImageTk
-from facet_area import facet_compute
+from facet_analysis import facet_compute
 
 
 def handle_image_input(string):

@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 from tkinter import *
 from tkinter import messagebox, ttk
 from PIL import Image, ImageTk
-from facet_area import facet_compute
+from facet_analysis import facet_compute
 from utilities import string_to_tuples
 
 
@@ -45,7 +45,7 @@ def formated_image():
 
 def analyze():
     def handle_no():
-        global confirmed
+        global confirmed, top
         top.destroy()
         confirmed = False
 
@@ -88,8 +88,9 @@ def analyze():
         else:
             stop_idx = None
 
+        # Test if the initialization works
         computation = facet_compute(
-            file, horizonal, vertical, units.get(), start_idx, stop_idx
+            file, horizonal, vertical, units.get(), file_name.get(), start_idx, stop_idx
         )
         computation.flood_count()
 

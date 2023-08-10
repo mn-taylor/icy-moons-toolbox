@@ -1,4 +1,5 @@
 import random
+import rasterio
 from PIL import Image
 
 white = (255, 255, 255)
@@ -19,10 +20,10 @@ def convert_to_RGB(file_name):
         new_image = Image.new(
             mode="RGB", size=(img.size[0], img.size[1]), color=(0, 0, 0)
         )
-        for row in img.size[0]:
-            for col in img.size[1]:
+        for row in range(img.size[0]):
+            for col in range(img.size[1]):
                 if img.getpixel((row, col)) == 255:
-                    new.putpixel((row, col), white)
+                    new_image.putpixel((row, col), white)
         return new_image
 
 
@@ -147,5 +148,33 @@ def string_to_tuples(string):
     return result
 
 
+def elevation_function(file):
+    # Takes in a TIF file and returns a look up function and the minimum elevation in the TIF file
+    with rasterio.open(file) as dataset:
+        band = dataset.read(1)
+
+        shape = band.shape
+        min = 10**20
+        for row in range(shape[0]):
+            for col in range(shape[1]):
+                x = band[row, col]
+                if min > x > -(10**20):
+                    min = x
+
+        # [col, row] because the pixels in the image are refereced with x, y
+        return lambda row, col: band[col, row], min
+
+
 if __name__ == "__main__":
+    get_elevation, min = elevation_function("Rhadamanthys.tif")
+    num = 0
+    sum = 0
+    for row in range(351):
+        for col in range(506):
+            if get_elevation(row, col) >= min:
+                sum += get_elevation(row, col)
+                num += 1
+
+    print(sum / num)
+
     pass

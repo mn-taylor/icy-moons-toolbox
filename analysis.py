@@ -3,11 +3,13 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import sys
 
-x_scale = 1.606400e03
-y_scale = 1.606400e03
+x_scale = 227.6509363851
+y_scale = 227.6509363851
+x_axis_units = 1e2
 
-x_axis_units = 1e3
-bucket_size = 25
+image_name = "Rhadamanthys"
+bucket_size = 20
+threshold = 0
 
 
 # Transforms each data point based on its bounding rectangle
@@ -75,17 +77,18 @@ def average_over_data():
 
 
 if __name__ == "__main__":
-    lengths = fracture_data_transform("Results.csv")
+    lengths = fracture_data_transform("Rhad-fracture-lengths-copy.csv")
     print(lengths)
-    nums = count(lengths, 25)
+    nums = count(lengths, bucket_size)
     print
     # Filters out outliers
-    nums = {k: v for k, v in nums.items() if v > 0}
+    nums = {k: v for k, v in nums.items() if v > threshold}
 
-    x = [bucket_size * length for length in nums.keys()]
+    x = [bucket_size * (length + 0.5) for length in nums.keys()]
 
     errors = []
     print(x_scale)
+    """
     for length in x:
         if 0 < length < 50 * x_scale / x_axis_units:
             errors.append(100 * 0.18 * x_scale / x_axis_units)
@@ -94,10 +97,11 @@ if __name__ == "__main__":
         else:
             errors.append(100 * 7.69 * x_scale / x_axis_units)
     print(list(zip(x, errors)))
+    """
     y = nums.values()
-    plt.bar(x, y, width=25 * 0.9, xscale="log")
-    plt.errorbar(x, y, xerr=errors, fmt="o", color="r", xscale="log")
-    plt.title("Distribution of Fracture Lengths in 5189r")
-    plt.xlabel("Lengths of Fractures (10^3 km)")
+    plt.bar(x, y, width=bucket_size * 0.9)
+    # plt.errorbar(x, y, xerr=errors, fmt="o", color="r", xscale="log")
+    plt.title(f"Fracture Length Distribution ({image_name})")
+    plt.xlabel("Lengths of Fractures (10^2 m)")
     plt.ylabel("# of Fractures")
     plt.show()
