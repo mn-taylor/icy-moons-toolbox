@@ -127,12 +127,53 @@ class contour_compute(facet_compute):
             deviations.append(arr[3])
             surface_areas.append(arr[0])
 
+        max_dev = max(deviations)
+        min_dev = min(deviations)
+        cm = plt.cm.get_cmap("viridis")
+
+        fig, ax = plt.subplots()
+        im = ax.scatter(surface_areas, deviations, marker="x", c=deviations, cmap=cm)
+        ax.set_title(f"Surface Area vs. Standard Deviation ({self.title})")
+        ax.set_xlabel(f"Surface Area ({self.units}^2)")
+        ax.set_ylabel(f"Standard Deviation (km)")
+        ax.set_xscale("log")
+        # ax.set_yscale("log")
+        fig.colorbar(im, ax=ax, label="Standard Deviation (km)")
+        plt.show()
+
+        """
         plt.title(f"Surface Area vs. Standard Deviation ({self.title})")
         plt.scatter(surface_areas, deviations, marker="x")
         plt.xlabel(f"Surface Area ({self.units}^2)")
         plt.xscale("log")
         plt.ylabel(f"Standard Deviation (km)")
         # plt.yscale("log")
+        plt.show()
+        """
+
+    def perimeter_vs_surface_stdev(self):
+        if self.contour_data == {}:
+            return
+        surface_areas = []
+        perimeters = []
+        deviations = []
+
+        for arr in self.contour_data.values():
+            deviations.append(arr[3])
+            perimeters.append(arr[1])
+            surface_areas.append(arr[0])
+
+        cm = plt.cm.get_cmap("viridis")
+
+        fig, ax = plt.subplots()
+
+        ax.set_title(f"Surface Area vs. Perimeter ({self.title})")
+        im = ax.scatter(surface_areas, perimeters, marker="x", c=deviations, cmap=cm)
+        ax.set_xlabel(f"Surface Area ({self.units}^2)")
+        ax.set_xscale("log")
+        ax.set_ylabel(f"Perimeter ({self.units})")
+        ax.set_yscale("log")
+        fig.colorbar(im, ax=ax, label="Standard Deviation (km)")
         plt.show()
 
     """
@@ -212,9 +253,13 @@ if __name__ == "__main__":
 
     x.flood_count()
     x.remove_facets([(0, 0), (505, 0), (350, 0), (376, 272)])
-    x.elevation_vs_surface_area()
-    x.elev_deviations_vs_surface_area()
-    """
+    # x.perimeter_vs_surface_stdev()
+    # x.elev_deviations_vs_surface_area()
+    # x.get_image().show()
+    print(f"# of facets : {len(x.contour_data)}")
+    # x.elevation_vs_surface_area()
+    # x.elev_deviations_vs_surface_area()
+
     y = facet_compute(
         "images/Rhadamanthys-fractures.png",
         0.2276509363851,
@@ -224,9 +269,28 @@ if __name__ == "__main__":
         (0, 0),
         None,
     )
+
+    x.perimeter_vs_surface_stdev()
+    # x.elev_deviations_vs_surface_area()
+
     y.flood_count()
     y.remove_facets([(0, 0), (505, 0), (350, 0), (376, 272)])
 
+    flat, corrected = [], []
+    max = 0
+    for key in x.data:
+        flat.append(y.data[key][0])
+        corrected.append(x.data[key][0])
+        if y.data[key][0] > max:
+            max = y.data[key][0]
+
+    fig, ax = plt.subplots()
+    ax.scatter(flat, corrected)
+    # ax.set_xlabel("Flat Surface Area (km^2)")
+    # ax.set_ylabel("Curved Surface Area (km^2)")
+    ax.plot([0, max], [0, max], "red")
+    plt.show()
+    """
     x_1, y_1 = [], []
     for arr in x.data.values():
         x_1.append(arr[0])

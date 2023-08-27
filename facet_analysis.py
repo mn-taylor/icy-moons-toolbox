@@ -262,10 +262,24 @@ class facet_compute:
     def get_image(self):
         return self.output
 
+    def split_dataset_by_surface(self, threshold):
+        below = [[], []]
+        above = [[], []]
+
+        for arr in self.data.values():
+            if arr[0] < threshold:
+                below[0].append(arr[0])  # surface area
+                below[1].append(arr[1])  # perimeter
+            else:
+                above[0].append(arr[0])
+                above[1].append(arr[1])
+
+        return below, above
+
 
 if __name__ == "__main__":
     x = facet_compute(
-        "images/Rhadamanthys-fractures.png",
+        "images\Rhadamanthys-fractures2.png",
         0.2276509363851,
         0.2276509363851,
         "km",
@@ -274,11 +288,11 @@ if __name__ == "__main__":
         None,
     )
     x.flood_count()
-
     x.remove_facets([(0, 0), (505, 0), (350, 0), (376, 272)])
+    # x.remove_facets([(0, 0), (505, 0), (350, 0), (376, 272)])
 
-    x.analyze_surface_area(bucket_size=50, threshold=0)
-    x.analyze_perimeter(bucket_size=25, threshold=0)
+    # x.analyze_surface_area(bucket_size=50, threshold=0)
+    x.analyze_perimeter(bucket_size=20, threshold=0)
     # print(len(list(x.facet_gen((749, 139), new_counted=True))))
     x.perimeter_vs_surface()
     x.get_image().show()
