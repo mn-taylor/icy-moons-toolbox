@@ -24,6 +24,7 @@ y = contour_compute(
 )
 y.flood_count()
 y.remove_facets([(0, 0), (505, 0), (350, 0), (376, 272)])
+y.get_image().save("images/display.png")
 
 fig, ax = plt.subplots()
 
