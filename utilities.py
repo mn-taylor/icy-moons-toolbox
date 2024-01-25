@@ -164,17 +164,21 @@ def elevation_function(file):
         # [col, row] because the pixels in the image are refereced with x, y
         return lambda row, col: band[col, row], min
 
+def split_dataset_by_surface(data, threshold):
+    below = [[], []]
+    above = [[], []]
+
+    for arr in data.values():
+        if arr[0] > threshold:
+            below[0].append(arr[0]) # surface area
+            below[1].append(arr[1]) # perimeter
+        else:
+            above[0].append(arr[0])
+            above[1].append(arr[1])
+        
+    return below, above
+
 
 if __name__ == "__main__":
-    get_elevation, min = elevation_function("Rhadamanthys.tif")
-    num = 0
-    sum = 0
-    for row in range(351):
-        for col in range(506):
-            if get_elevation(row, col) >= min:
-                sum += get_elevation(row, col)
-                num += 1
-
-    print(sum / num)
-
+    
     pass

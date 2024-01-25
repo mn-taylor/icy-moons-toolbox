@@ -4,27 +4,28 @@ from scipy import stats
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 threshold = 10 ** (1.5)
 x = facet_compute(
     "images/true_fractures.png", 1.606400, 1.6657, "km", "5178r", (200, 13)
 )
 x.flood_count()
 x.remove_facets([(778, 198)])
+x.offload_data("5178r_facet_data.csv")
 
-y = contour_compute(
+y = facet_compute(
     "images/Rhadamanthys-fractures2.png",
     0.227651,
     0.227651,
     "km",
     "Rhadamanthys",
-    "Rhadamanthys.tif",
     (0, 0),
     None,
 )
 y.flood_count()
 y.remove_facets([(0, 0), (505, 0), (350, 0), (376, 272)])
-y.get_image().save("images/display.png")
+# y.offload_data("Rhadamanthys_facet_data.csv")
+
+# y.get_image().save("images/display.png")
 
 fig, ax = plt.subplots()
 
