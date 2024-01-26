@@ -1,6 +1,6 @@
 from facet_analysis import facet_compute
 from utilities import elevation_function, color_pallete, targeted_rand_color
-from analysis import count
+from length_analysis import count
 
 import math
 import matplotlib.pyplot as plt

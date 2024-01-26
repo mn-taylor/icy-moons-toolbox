@@ -6,7 +6,7 @@ from utilities import (
     is_color,
     convert_to_RGB,
 )
-from analysis import count
+from length_analysis import count
 
 import matplotlib.pyplot as plt
 import pandas as pd
