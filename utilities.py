@@ -7,12 +7,17 @@ black = (0, 0, 0)
 
 
 def is_color(color):
-    # test
     return all(0 <= x <= 255 for x in color)
 
 
 def convert_to_RGB(file_name):
-    # if input image is not an RBG image, returns a copy.
+    """
+    Returns a copy of an image in the RGB format
+        Parameters:
+            file_name (string) : name of image
+        Output:
+            new_image (PIL Image Object) : Copy of image in RGB format
+    """
     img = Image.open(file_name).copy()
     if isinstance(img.getpixel((0, 0)), tuple):
         return img
@@ -42,6 +47,18 @@ def targeted_rand_color(palette):
 
 
 def color_pallete(num_colors, root_colors, shift, radius):
+    """
+    Returns a list of colors that are slight variations from the input root color
+    Parameters:
+        num_colors (int): number of colors to be generated
+        root_colors (list(tuple)) : list of RGB colors
+        shift (int): min distance between two colors to be generated
+        radius (int): max distance between any generated color and a root colors.
+    Output:
+        color pallete (list(tuple)) : list of RBG colors
+
+    """
+
     def color_shift(color, root):
         candidates = [
             (color[0] + shift, color[1], color[2] + shift),
@@ -91,9 +108,15 @@ def color_pallete(num_colors, root_colors, shift, radius):
 
 def configure_boundary(image, start, stop, counted):
     """
-    image -> PIL Image Object
-    start -> tuple
-    stop -> tuple
+    Returns functions that essentially crop the input image
+    Parameters:
+        image (PIL Image Object) : image to be cropped
+        start (tuple) : Top left corner of cropped rectangle
+        stop (tuple) : Bottom right corner of cropped rectangle
+        counted (set) : Set of pixels that have been visited/colored in flood coloring
+    Output:
+        get_neighbors_func (function) : Takes in a pixel location and return the pixels that are adjacent
+        next_location_func (function) : Takes in a pixel location and gives the right adjacent pixel.
 
     """
     deltas = {(0, +1), (0, -1), (+1, 0), (-1, 0)}
@@ -164,21 +187,21 @@ def elevation_function(file):
         # [col, row] because the pixels in the image are refereced with x, y
         return lambda row, col: band[col, row], min
 
+
 def split_dataset_by_surface(data, threshold):
     below = [[], []]
     above = [[], []]
 
     for arr in data.values():
         if arr[0] > threshold:
-            below[0].append(arr[0]) # surface area
-            below[1].append(arr[1]) # perimeter
+            below[0].append(arr[0])  # surface area
+            below[1].append(arr[1])  # perimeter
         else:
             above[0].append(arr[0])
             above[1].append(arr[1])
-        
+
     return below, above
 
 
 if __name__ == "__main__":
-    
     pass

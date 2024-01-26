@@ -278,21 +278,4 @@ class facet_compute:
 
 
 if __name__ == "__main__":
-    x = facet_compute(
-        "images\Rhadamanthys-fractures2.png",
-        0.2276509363851,
-        0.2276509363851,
-        "km",
-        "Rhadamanthys",
-        (0, 0),
-        None,
-    )
-    x.flood_count()
-    x.remove_facets([(0, 0), (505, 0), (350, 0), (376, 272)])
-    # x.remove_facets([(0, 0), (505, 0), (350, 0), (376, 272)])
-
-    # x.analyze_surface_area(bucket_size=50, threshold=0)
-    x.analyze_perimeter(bucket_size=20, threshold=0)
-    # print(len(list(x.facet_gen((749, 139), new_counted=True))))
-    x.perimeter_vs_surface()
-    x.get_image().show()
+    pass
